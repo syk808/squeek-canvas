@@ -2,7 +2,7 @@
 
 Squeektoshi paints. A daily generative painting drawn only from the hamster's real runs on Squeekchain.
 
-**Live: https://syk808.github.io/squeek-canvas/**
+**Live: https://canvas.syk233.com**
 
 - **The canvas is a 24-hour clock (UTC)**, midnight at the top.
 - **Every half hour he runs is a brushstroke** from the centre outward: more wheel work, longer and heavier stroke. Quiet half hours leave bare canvas.
