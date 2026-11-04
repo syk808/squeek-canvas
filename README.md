@@ -2,6 +2,8 @@
 
 Squeektoshi paints. A daily generative painting drawn only from the hamster's real runs on Squeekchain.
 
+**Live: https://syk808.github.io/squeek-canvas/**
+
 - **The canvas is a 24-hour clock (UTC)**, midnight at the top.
 - **Every half hour he runs is a brushstroke** from the centre outward: more wheel work, longer and heavier stroke. Quiet half hours leave bare canvas.
 - **Every Squeekchain settlement is a paint drop**, placed and coloured by its transaction hash, so each drop is unique and can be checked on Sepolia.
