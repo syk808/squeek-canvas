@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Squeek Canvas</title>
 <meta name="description" content="Squeektoshi paints. Every run on the wheel becomes a brushstroke, every Squeekchain settlement a drop of paint. One painting per day, drawn live from the public Squeekchain API.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Squeek Canvas">
+<meta property="og:description" content="A hamster paints. One generative painting per day, drawn only from Squeektoshi's real runs on the wheel.">
+<meta property="og:url" content="https://canvas.syk233.com/">
+<meta property="og:image" content="https://canvas.syk233.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canvas.syk233.com/og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%233a2c1f'/%3E%3Crect x='6' y='6' width='52' height='52' fill='%23fbf6ec'/%3E%3Cpath d='M32 32 L54 22 L55 30 Z' fill='%23e8b14a'/%3E%3Cpath d='M32 32 L50 44 L45 49 Z' fill='%23c4552d'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%232a2118'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -71,14 +79,15 @@ footer a{color:inherit}
   <section class="today" aria-label="Selected painting">
     <div class="easel"><canvas id="big" width="1200" height="1200" aria-label="Painting"></canvas></div>
     <div class="plaque">
-      <h2 id="title">Today, still wet</h2>
+      <h2 id="title">Reading the wheel…</h2>
+      <p class="legend" id="ago" hidden></p>
       <dl class="facts">
-        <div><dt>Date (UTC)</dt><dd id="fDate">—</dd></div>
-        <div><dt>Wheel work</dt><dd id="fWork">—</dd></div>
-        <div><dt>Distance</dt><dd id="fDist">—</dd></div>
-        <div><dt>Brushstrokes</dt><dd id="fStrokes">—</dd></div>
-        <div><dt>Paint drops (settlements)</dt><dd id="fDrops">—</dd></div>
-        <div><dt>Busiest half hour</dt><dd id="fPeak">—</dd></div>
+        <div><dt>Date (UTC)</dt><dd id="fDate">…</dd></div>
+        <div><dt>Wheel work</dt><dd id="fWork">…</dd></div>
+        <div><dt>Distance</dt><dd id="fDist">…</dd></div>
+        <div><dt>Brushstrokes</dt><dd id="fStrokes">…</dd></div>
+        <div><dt>Paint drops (settlements)</dt><dd id="fDrops">…</dd></div>
+        <div><dt>Busiest half hour</dt><dd id="fPeak">…</dd></div>
       </dl>
       <p class="legend">How to read it: the painting is a 24-hour clock (UTC), midnight at the top. Each half-hour the hamster runs becomes a stroke from the centre outward; more work makes it longer and heavier. Quiet half-hours leave bare canvas. Every day gets its own palette, seeded by the date. Today's settlements land as paint drops, placed and coloured by their transaction hash, so every one is unique and checkable on Sepolia.</p>
       <div class="btns">
@@ -192,8 +201,15 @@ function hang(day) {
   selected = day;
   if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
   const res = paint($('big'), day);
-  const isToday = day.date === new Date().toISOString().slice(0, 10);
-  $('title').textContent = isToday ? 'Today, still wet' : 'Run of ' + day.date;
+  const today = new Date().toISOString().slice(0, 10);
+  const isToday = day.date === today;
+  const isLatest = days.length && day.date === days[days.length - 1].date;
+  $('title').textContent = isToday ? 'Today, still wet' : (isLatest ? 'Latest run · ' : 'Run of ') + day.date;
+  // The newest painting is not today's when he hasn't run yet: say how old it is, so a quiet wheel doesn't look like a broken page.
+  const ago = Math.round((Date.parse(today) - Date.parse(day.date)) / 864e5);
+  $('ago').hidden = isToday || !isLatest;
+  $('ago').textContent = ago === 1 ? 'No run yet today (UTC). This is yesterday\'s painting.'
+    : `No run for ${ago} days. This is the last painting; today's starts with his next run.`;
   $('fDate').textContent = day.date;
   $('fWork').textContent = fmtInt(day.work) + ' units';
   $('fDist').textContent = fmtKm(day.distanceMm);
@@ -282,6 +298,15 @@ $('replay').addEventListener('click', () => {
   replayTimer = setInterval(() => { i++; paint($('big'), selected, { upto: i }); if (i >= 48) { clearInterval(replayTimer); replayTimer = null; hang(selected); } }, 90);
 });
 
+// Before the API answers: a blank sheet with a note, not an empty frame that looks broken.
+(function placeholder() {
+  const c = $('big'), ctx = c.getContext('2d'), W = c.width;
+  ctx.fillStyle = '#fbf6ec'; ctx.fillRect(0, 0, W, W);
+  ctx.strokeStyle = 'rgba(90,70,50,.12)'; ctx.lineWidth = W / 600;
+  ctx.beginPath(); ctx.arc(W / 2, W / 2, W * 0.46, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(42,33,24,.45)'; ctx.font = `${Math.round(W / 30)}px Fraunces, Georgia, serif`;
+  ctx.textAlign = 'center'; ctx.fillText('Mixing the paint…', W / 2, W / 2);
+})();
 refresh(true); loadStatus();
 setInterval(loadStatus, 15000);          // wheel status
 setInterval(() => refresh(false), 300000); // today's painting grows every 5 minutes
